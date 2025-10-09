@@ -8,7 +8,7 @@ from utils.logger import get_logger, request_id_ctx_var
 
 logger = get_logger()
 
-app = FastAPI(title="Bizchat-AI")
+app = FastAPI(title="Resume-Builder")
 
 
 @app.middleware("http")

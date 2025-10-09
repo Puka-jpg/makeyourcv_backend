@@ -1,7 +1,25 @@
 [project]
-name = "resume-builder"
+name = "Resume-builder"
 version = "0.1.0"
-description = "Add your description here"
+
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi>=0.118.0",
+    "pydantic-settings>=2.11.0",
+    "uvicorn>=0.37.0",
+]
+
+[dependency-groups]
+dev= [
+    "mypy>=1.18.2",
+    "ruff>=0.14.0",
+]
+
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+[tool.ruff.lint]
+ignore = ["E501"]
+extend-select = ["E", "I", "F", "G", "N", "T201"]

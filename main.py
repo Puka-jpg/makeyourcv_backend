@@ -1,6 +1,8 @@
-def main():
-    print("Hello from resume-builder!")
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/health", tags=["Health"])
+async def health():
+    return "okey"

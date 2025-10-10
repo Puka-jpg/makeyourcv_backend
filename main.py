@@ -29,7 +29,6 @@ async def logging_middleware(
     return response
 
 
-@app.get("/healthz", tags=["Health"])
+@app.get("/", tags=["Health"])
 async def healthz():
-    logger.info("Health check")
     return "ok!"

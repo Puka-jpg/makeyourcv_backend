@@ -5,6 +5,7 @@ help:
 	@echo "lint                     -- lint backend"
 	@echo "mypy                     -- type check backend"
 	@echo "dev                      -- start backend development server"
+	@echo "generate-configs         -- generate deployment configs"
 	@echo
 
 
@@ -31,3 +32,7 @@ dev:
 .PHONY: clean
 clean:
 	docker compose down -v
+
+.PHONY: generate-configs
+generate-configs:
+	uv run generate_configs.py

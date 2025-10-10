@@ -1,6 +1,7 @@
 from settings import settings
 
 worker_class = "uvicorn.workers.UvicornWorker"
+wsgi_app = "main:app"
 bind = "0.0.0.0:8080"
 
 accesslog = settings.GUNICORN_ACCESS_LOG

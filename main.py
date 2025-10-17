@@ -3,6 +3,7 @@ from typing import Awaitable, Callable
 from uuid import uuid4
 
 from fastapi import FastAPI, Request, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
@@ -37,6 +38,15 @@ app = FastAPI(
         }
     },
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 limiter = Limiter(
     key_func=get_remote_address,

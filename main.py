@@ -10,6 +10,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from db import sessionmanager
+from routes.input_skills import router as skill_input
 from schemas.common import ErrorResponseSchema
 from settings import settings
 from utils.constants import API_RATE_LIMIT
@@ -82,6 +83,9 @@ async def logging_middleware(
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
     return response
+
+
+app.include_router(skill_input, prefix="/api/skill_input", tags=["Input Skills"])
 
 
 @app.get("/", tags=["Health"])

@@ -10,7 +10,8 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from db import sessionmanager
-from routes.skill_routes import router as skill_input
+from routes.personal_info_routes import router as personal_info_routes
+from routes.user_routes import router as user_routes
 from schemas.common import ErrorResponseSchema
 from settings import settings
 from utils.constants import API_RATE_LIMIT
@@ -85,7 +86,10 @@ async def logging_middleware(
     return response
 
 
-app.include_router(skill_input, prefix="/api/skills", tags=["Skills Management"])
+app.include_router(user_routes, prefix="/api/users", tags=["User Management"])
+app.include_router(
+    personal_info_routes, prefix="/api/personal-info", tags=["Personal Info"]
+)
 
 
 @app.get("/", tags=["Health"])

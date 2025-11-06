@@ -216,11 +216,11 @@ class Experience(Base):
 
     # User's original input
     description: Mapped[Optional[str]] = mapped_column(Text)
-    achievements: Mapped[Optional[dict]] = mapped_column(JSON)  # Array of strings
+    achievements: Mapped[Optional[List[str]]] = mapped_column(JSON)  # Array of strings
 
     # AI-enhanced versions
     description_enhanced: Mapped[Optional[str]] = mapped_column(Text)
-    achievements_enhanced: Mapped[Optional[dict]] = mapped_column(
+    achievements_enhanced: Mapped[Optional[List[str]]] = mapped_column(
         JSON
     )  # Array of strings
 
@@ -230,7 +230,7 @@ class Experience(Base):
         DateTime(timezone=True)
     )
 
-    technologies_used: Mapped[Optional[dict]] = mapped_column(JSON)
+    technologies_used: Mapped[Optional[List[str]]] = mapped_column(JSON)
     display_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -260,11 +260,11 @@ class Project(Base):
 
     # User's original input
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    highlights: Mapped[Optional[dict]] = mapped_column(JSON)  # Array of strings
+    highlights: Mapped[Optional[List[str]]] = mapped_column(JSON)  # Array of strings
 
     # AI-enhanced versions
     description_enhanced: Mapped[Optional[str]] = mapped_column(Text)
-    highlights_enhanced: Mapped[Optional[dict]] = mapped_column(
+    highlights_enhanced: Mapped[Optional[List[str]]] = mapped_column(
         JSON
     )  # Array of strings
 
@@ -278,7 +278,7 @@ class Project(Base):
     github_url: Mapped[Optional[str]] = mapped_column(String(500))
     start_date: Mapped[Optional[date]] = mapped_column(Date)
     end_date: Mapped[Optional[date]] = mapped_column(Date)
-    technologies_used: Mapped[Optional[dict]] = mapped_column(JSON)
+    technologies_used: Mapped[Optional[List[str]]] = mapped_column(JSON)
     is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     display_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -306,7 +306,9 @@ class TechnicalSkill(Base):
         Integer, ForeignKey("users.id"), nullable=False
     )
     category: Mapped[str] = mapped_column(String(255), nullable=False)
-    skills: Mapped[dict] = mapped_column(JSON, nullable=False)  # Array of skill names
+    skills: Mapped[List[str]] = mapped_column(
+        JSON, nullable=False
+    )  # Array of skill names
     display_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

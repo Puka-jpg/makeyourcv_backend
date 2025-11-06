@@ -10,7 +10,15 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from db import sessionmanager
+from routes.certification_routes import router as certification_routes
+from routes.custom_section_routes import router as custom_section_routes
+from routes.education_routes import router as education_routes
+from routes.experience_routes import router as experience_routes
 from routes.personal_info_routes import router as personal_info_routes
+from routes.project_routes import router as project_routes
+from routes.publication_routes import router as publication_routes
+from routes.summary_routes import router as summary_routes
+from routes.technical_skill_routes import router as technical_skill_routes
 from routes.user_routes import router as user_routes
 from schemas.common import ErrorResponseSchema
 from settings import settings
@@ -89,6 +97,22 @@ async def logging_middleware(
 app.include_router(user_routes, prefix="/api/users", tags=["User Management"])
 app.include_router(
     personal_info_routes, prefix="/api/personal-info", tags=["Personal Info"]
+)
+app.include_router(summary_routes, prefix="/api/summary", tags=["Summary"])
+app.include_router(education_routes, prefix="/api/education", tags=["Education"])
+app.include_router(experience_routes, prefix="/api/experiences", tags=["Experience"])
+app.include_router(project_routes, prefix="/api/projects", tags=["Projects"])
+app.include_router(
+    technical_skill_routes, prefix="/api/technical-skills", tags=["Technical Skills"]
+)
+app.include_router(
+    publication_routes, prefix="/api/publications", tags=["Publications"]
+)
+app.include_router(
+    certification_routes, prefix="/api/certifications", tags=["Certifications"]
+)
+app.include_router(
+    custom_section_routes, prefix="/api/custom-sections", tags=["Custom Sections"]
 )
 
 

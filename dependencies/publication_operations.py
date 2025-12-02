@@ -4,7 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Publication
-from schemas.publication_schemas import PublicationCreateSchema, PublicationUpdateSchema
+from schemas.user_input_schemas.publication_schemas import (
+    PublicationCreateSchema,
+    PublicationUpdateSchema,
+)
 
 
 class PublicationOperations:

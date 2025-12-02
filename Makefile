@@ -4,6 +4,7 @@ help:
 	@echo "format                   -- format backend"
 	@echo "lint                     -- lint backend"
 	@echo "mypy                     -- type check backend"
+	@echo "spellcheck                    -- spell check "
 	@echo "test                     -- test backend"
 	@echo "dev                      -- start backend development server"
 	@echo "generate-configs         -- generate deployment configs"
@@ -26,6 +27,10 @@ mypy:
 format:
 	uv run ruff check --fix .
 	uv run ruff format .
+
+.PHONY: spellcheck
+spellcheck:
+	uv run codespell --skip="*.git,*.json,package-lock.json" .
 
 .PHONY: test
 test:

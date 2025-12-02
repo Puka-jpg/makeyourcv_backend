@@ -4,7 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Experience
-from schemas.experience_schemas import ExperienceCreateSchema, ExperienceUpdateSchema
+from schemas.user_input_schemas.experience_schemas import (
+    ExperienceCreateSchema,
+    ExperienceUpdateSchema,
+)
 
 
 class ExperienceOperations:

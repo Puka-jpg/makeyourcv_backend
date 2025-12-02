@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import User
-from schemas.user_schemas import UserCreateSchema, UserUpdateSchema
+from schemas.user_input_schemas.user_schemas import UserCreateSchema, UserUpdateSchema
 
 
 class UserOperations:

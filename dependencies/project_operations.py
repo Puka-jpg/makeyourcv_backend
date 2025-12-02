@@ -4,7 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Project
-from schemas.project_schemas import ProjectCreateSchema, ProjectUpdateSchema
+from schemas.user_input_schemas.project_schemas import (
+    ProjectCreateSchema,
+    ProjectUpdateSchema,
+)
 
 
 class ProjectOperations:

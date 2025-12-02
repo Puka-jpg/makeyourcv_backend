@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.summary_operations import SummaryOperations
 from dependencies.user_operations import UserOperations
-from schemas.summary_schemas import (
+from schemas.user_input_schemas.summary_schemas import (
     SummaryCreateSchema,
     SummaryResponseSchema,
     SummaryUpdateSchema,

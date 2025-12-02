@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.project_operations import ProjectOperations
 from dependencies.user_operations import UserOperations
-from schemas.project_schemas import (
+from schemas.user_input_schemas.project_schemas import (
     ProjectCreateSchema,
     ProjectResponseSchema,
     ProjectUpdateSchema,

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.certification_operations import CertificationOperations
 from dependencies.user_operations import UserOperations
-from schemas.certification_schemas import (
+from schemas.user_input_schemas.certification_schemas import (
     CertificationCreateSchema,
     CertificationResponseSchema,
     CertificationUpdateSchema,

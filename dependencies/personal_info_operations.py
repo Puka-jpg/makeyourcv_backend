@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import PersonalInfo
-from schemas.personal_info_schemas import (
+from schemas.user_input_schemas.personal_info_schemas import (
     PersonalInfoCreateSchema,
     PersonalInfoUpdateSchema,
 )

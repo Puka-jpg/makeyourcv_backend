@@ -4,7 +4,7 @@ help:
 	@echo "format                   -- format backend"
 	@echo "lint                     -- lint backend"
 	@echo "mypy                     -- type check backend"
-	@echo "spellcheck                    -- spell check "
+	@echo "spellcheck               -- spell check "
 	@echo "test                     -- test backend"
 	@echo "dev                      -- start backend development server"
 	@echo "generate-configs         -- generate deployment configs"

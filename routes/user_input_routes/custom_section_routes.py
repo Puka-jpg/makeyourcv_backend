@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.custom_section_operations import CustomSectionOperations
 from dependencies.user_operations import UserOperations
-from schemas.custom_section_schemas import (
+from schemas.user_input_schemas.custom_section_schemas import (
     CustomSectionCreateSchema,
     CustomSectionResponseSchema,
     CustomSectionUpdateSchema,

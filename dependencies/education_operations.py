@@ -4,7 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Education
-from schemas.education_schemas import EducationCreateSchema, EducationUpdateSchema
+from schemas.user_input_schemas.education_schemas import (
+    EducationCreateSchema,
+    EducationUpdateSchema,
+)
 
 
 class EducationOperations:

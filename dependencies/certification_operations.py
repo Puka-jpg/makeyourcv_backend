@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Certification
-from schemas.certification_schemas import (
+from schemas.user_input_schemas.certification_schemas import (
     CertificationCreateSchema,
     CertificationUpdateSchema,
 )

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.publication_operations import PublicationOperations
 from dependencies.user_operations import UserOperations
-from schemas.publication_schemas import (
+from schemas.user_input_schemas.publication_schemas import (
     PublicationCreateSchema,
     PublicationResponseSchema,
     PublicationUpdateSchema,

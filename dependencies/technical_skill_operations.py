@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import TechnicalSkill
-from schemas.technical_skill_schemas import (
+from schemas.user_input_schemas.technical_skill_schemas import (
     TechnicalSkillCreateSchema,
     TechnicalSkillUpdateSchema,
 )

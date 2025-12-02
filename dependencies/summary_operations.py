@@ -4,7 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Summary
-from schemas.summary_schemas import SummaryCreateSchema, SummaryUpdateSchema
+from schemas.user_input_schemas.summary_schemas import (
+    SummaryCreateSchema,
+    SummaryUpdateSchema,
+)
 
 
 class SummaryOperations:

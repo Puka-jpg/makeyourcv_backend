@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.technical_skill_operations import TechnicalSkillOperations
 from dependencies.user_operations import UserOperations
-from schemas.technical_skill_schemas import (
+from schemas.user_input_schemas.technical_skill_schemas import (
     TechnicalSkillCreateSchema,
     TechnicalSkillResponseSchema,
     TechnicalSkillUpdateSchema,

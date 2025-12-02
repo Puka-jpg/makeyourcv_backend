@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.experience_operations import ExperienceOperations
 from dependencies.user_operations import UserOperations
-from schemas.experience_schemas import (
+from schemas.user_input_schemas.experience_schemas import (
     ExperienceCreateSchema,
     ExperienceResponseSchema,
     ExperienceUpdateSchema,

@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import CustomSection
-from schemas.custom_section_schemas import (
+from schemas.user_input_schemas.custom_section_schemas import (
     CustomSectionCreateSchema,
     CustomSectionUpdateSchema,
 )

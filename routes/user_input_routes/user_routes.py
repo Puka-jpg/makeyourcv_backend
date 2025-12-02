@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
 from dependencies.user_operations import UserOperations
-from schemas.user_schemas import (
+from schemas.user_input_schemas.user_schemas import (
     UserCreateSchema,
     UserResponseSchema,
     UserUpdateSchema,

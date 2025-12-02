@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_db
 from dependencies.education_operations import EducationOperations
 from dependencies.user_operations import UserOperations
-from schemas.education_schemas import (
+from schemas.user_input_schemas.education_schemas import (
     EducationCreateSchema,
     EducationResponseSchema,
     EducationUpdateSchema,

@@ -10,16 +10,20 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from db import sessionmanager
-from routes.certification_routes import router as certification_routes
-from routes.custom_section_routes import router as custom_section_routes
-from routes.education_routes import router as education_routes
-from routes.experience_routes import router as experience_routes
-from routes.personal_info_routes import router as personal_info_routes
-from routes.project_routes import router as project_routes
-from routes.publication_routes import router as publication_routes
-from routes.summary_routes import router as summary_routes
-from routes.technical_skill_routes import router as technical_skill_routes
-from routes.user_routes import router as user_routes
+from routes.user_input_routes.certification_routes import router as certification_routes
+from routes.user_input_routes.custom_section_routes import (
+    router as custom_section_routes,
+)
+from routes.user_input_routes.education_routes import router as education_routes
+from routes.user_input_routes.experience_routes import router as experience_routes
+from routes.user_input_routes.personal_info_routes import router as personal_info_routes
+from routes.user_input_routes.project_routes import router as project_routes
+from routes.user_input_routes.publication_routes import router as publication_routes
+from routes.user_input_routes.summary_routes import router as summary_routes
+from routes.user_input_routes.technical_skill_routes import (
+    router as technical_skill_routes,
+)
+from routes.user_input_routes.user_routes import router as user_routes
 from schemas.common import ErrorResponseSchema
 from settings import settings
 from utils.constants import API_RATE_LIMIT

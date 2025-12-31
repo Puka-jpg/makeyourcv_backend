@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -15,7 +16,7 @@ class TechnicalSkillBaseSchema(BaseModel):
 class TechnicalSkillCreateSchema(TechnicalSkillBaseSchema, ContentBaseSchema):
     """Schema for creating technical skill"""
 
-    user_id: int
+    pass
 
 
 class TechnicalSkillUpdateSchema(BaseModel):
@@ -32,7 +33,7 @@ class TechnicalSkillResponseSchema(
 ):
     """Schema for technical skill responses"""
 
-    id: int
-    user_id: int
+    id: UUID
+    user_id: UUID
 
     model_config = ConfigDict(from_attributes=True)

@@ -1,22 +1,34 @@
 from typing import List
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
-from dependencies.certification_operations import CertificationOperations
-from dependencies.user_operations import UserOperations
+from dependencies.auth_dependencies.auth import get_current_user
+from dependencies.user_input_dependencies.certification_operations import (
+    CertificationOperations,
+)
+from schemas.common import ErrorResponseSchema
 from schemas.user_input_schemas.certification_schemas import (
     CertificationCreateSchema,
     CertificationResponseSchema,
     CertificationUpdateSchema,
 )
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponseSchema,
+            "description": "Forbidden Response",
+        }
+    },
+)
 
 
 @router.post(
-    "/create",
+    "/",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_201_CREATED: {
@@ -29,22 +41,17 @@ router = APIRouter()
     },
 )
 async def create_certification(
-    payload: CertificationCreateSchema, db: AsyncSession = Depends(get_db)
+    payload: CertificationCreateSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     ops = CertificationOperations(db)
-    user_ops = UserOperations(db)
-    user = await user_ops.get_user_by_id(payload.user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"User with id {payload.user_id} not found",
-        )
-    certification = await ops.create_certification(payload)
+    certification = await ops.create_certification(payload, current_user.id)
     return certification
 
 
 @router.get(
-    "/list",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -54,13 +61,15 @@ async def create_certification(
     },
 )
 async def get_all_certifications(
-    user_id: int = Query(..., description="User ID"),
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     ops = CertificationOperations(db)
-    certifications = await ops.get_all_certifications(user_id, skip=skip, limit=limit)
+    certifications = await ops.get_all_certifications(
+        current_user.id, skip=skip, limit=limit
+    )
     return certifications
 
 
@@ -78,12 +87,12 @@ async def get_all_certifications(
     },
 )
 async def get_certification_by_id(
-    certification_id: int,
-    user_id: int = Query(..., description="User ID"),
+    certification_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     ops = CertificationOperations(db)
-    certification = await ops.get_certification_by_id(certification_id, user_id)
+    certification = await ops.get_certification_by_id(certification_id, current_user.id)
     if not certification:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -106,13 +115,15 @@ async def get_certification_by_id(
     },
 )
 async def update_certification(
-    certification_id: int,
+    certification_id: UUID,
     payload: CertificationUpdateSchema,
-    user_id: int = Query(..., description="User ID"),
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     ops = CertificationOperations(db)
-    certification = await ops.update_certification(certification_id, user_id, payload)
+    certification = await ops.update_certification(
+        certification_id, current_user.id, payload
+    )
     if not certification:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -134,12 +145,12 @@ async def update_certification(
     },
 )
 async def delete_certification(
-    certification_id: int,
-    user_id: int = Query(..., description="User ID"),
+    certification_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     ops = CertificationOperations(db)
-    deleted = await ops.delete_certification(certification_id, user_id)
+    deleted = await ops.delete_certification(certification_id, current_user)
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

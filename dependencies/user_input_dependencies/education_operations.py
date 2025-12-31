@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,10 +15,12 @@ class EducationOperations:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_education(self, payload: EducationCreateSchema) -> Education:
+    async def create_education(
+        self, payload: EducationCreateSchema, user_id: UUID
+    ) -> Education:
         """Create education in the database"""
         education = Education(
-            user_id=payload.user_id,
+            user_id=user_id,
             institution_name=payload.institution_name,
             degree=payload.degree,
             field_of_study=payload.field_of_study,
@@ -37,7 +40,7 @@ class EducationOperations:
         return education
 
     async def get_all_education(
-        self, user_id: int, skip: int = 0, limit: int = 100
+        self, user_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[Education]:
         """Retrieve all education for a user"""
         query = (
@@ -52,7 +55,7 @@ class EducationOperations:
         return list(education_list)
 
     async def get_education_by_id(
-        self, education_id: int, user_id: int
+        self, education_id: UUID, user_id: UUID
     ) -> Optional[Education]:
         """Retrieve single education by ID"""
         query = select(Education).where(
@@ -63,7 +66,10 @@ class EducationOperations:
         return education
 
     async def update_education(
-        self, education_id: int, user_id: int, payload: EducationUpdateSchema
+        self,
+        education_id: UUID,
+        payload: EducationUpdateSchema,
+        user_id: UUID,
     ) -> Optional[Education]:
         """Update existing education"""
         education = await self.get_education_by_id(education_id, user_id)
@@ -98,7 +104,7 @@ class EducationOperations:
         await self.db.refresh(education)
         return education
 
-    async def delete_education(self, education_id: int, user_id: int) -> bool:
+    async def delete_education(self, education_id: UUID, user_id: UUID) -> bool:
         """Delete education by ID"""
         education = await self.get_education_by_id(education_id, user_id)
 

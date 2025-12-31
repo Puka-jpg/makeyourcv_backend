@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,10 +15,10 @@ class ProjectOperations:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_project(self, payload: ProjectCreateSchema) -> Project:
+    async def create_project(self, user_id, payload: ProjectCreateSchema) -> Project:
         """Create project in the database"""
         project = Project(
-            user_id=payload.user_id,
+            user_id=user_id,
             project_name=payload.project_name,
             description=payload.description,
             highlights=payload.highlights,
@@ -38,7 +39,7 @@ class ProjectOperations:
         return project
 
     async def get_all_projects(
-        self, user_id: int, skip: int = 0, limit: int = 100
+        self, user_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[Project]:
         """Retrieve all projects for a user"""
         query = (
@@ -53,7 +54,7 @@ class ProjectOperations:
         return list(projects)
 
     async def get_project_by_id(
-        self, project_id: int, user_id: int
+        self, project_id: UUID, user_id: UUID
     ) -> Optional[Project]:
         """Retrieve single project by ID"""
         query = select(Project).where(
@@ -64,7 +65,7 @@ class ProjectOperations:
         return project
 
     async def update_project(
-        self, project_id: int, user_id: int, payload: ProjectUpdateSchema
+        self, project_id: UUID, user_id: UUID, payload: ProjectUpdateSchema
     ) -> Optional[Project]:
         """Update existing project"""
         project = await self.get_project_by_id(project_id, user_id)
@@ -99,7 +100,7 @@ class ProjectOperations:
         await self.db.refresh(project)
         return project
 
-    async def delete_project(self, project_id: int, user_id: int) -> bool:
+    async def delete_project(self, project_id: UUID, user_id: UUID) -> bool:
         """Delete project by ID"""
         project = await self.get_project_by_id(project_id, user_id)
 

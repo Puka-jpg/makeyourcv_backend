@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,11 +16,11 @@ class TechnicalSkillOperations:
         self.db = db
 
     async def create_technical_skill(
-        self, payload: TechnicalSkillCreateSchema
+        self, payload: TechnicalSkillCreateSchema, user_id: UUID
     ) -> TechnicalSkill:
         """Create technical skill in the database"""
         technical_skill = TechnicalSkill(
-            user_id=payload.user_id,
+            user_id=user_id,
             category=payload.category,
             skills=payload.skills,
             display_order=payload.display_order,
@@ -31,7 +32,7 @@ class TechnicalSkillOperations:
         return technical_skill
 
     async def get_all_technical_skills(
-        self, user_id: int, skip: int = 0, limit: int = 100
+        self, user_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[TechnicalSkill]:
         """Retrieve all technical skills for a user"""
         query = (
@@ -46,7 +47,7 @@ class TechnicalSkillOperations:
         return list(skills)
 
     async def get_technical_skill_by_id(
-        self, skill_id: int, user_id: int
+        self, skill_id: UUID, user_id: UUID
     ) -> Optional[TechnicalSkill]:
         """Retrieve single technical skill by ID"""
         query = select(TechnicalSkill).where(
@@ -57,7 +58,7 @@ class TechnicalSkillOperations:
         return skill
 
     async def update_technical_skill(
-        self, skill_id: int, user_id: int, payload: TechnicalSkillUpdateSchema
+        self, skill_id: UUID, user_id: UUID, payload: TechnicalSkillUpdateSchema
     ) -> Optional[TechnicalSkill]:
         """Update existing technical skill"""
         skill = await self.get_technical_skill_by_id(skill_id, user_id)
@@ -78,7 +79,7 @@ class TechnicalSkillOperations:
         await self.db.refresh(skill)
         return skill
 
-    async def delete_technical_skill(self, skill_id: int, user_id: int) -> bool:
+    async def delete_technical_skill(self, skill_id: UUID, user_id: UUID) -> bool:
         """Delete technical skill by ID"""
         skill = await self.get_technical_skill_by_id(skill_id, user_id)
 

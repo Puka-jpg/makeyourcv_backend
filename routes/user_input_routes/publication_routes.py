@@ -1,22 +1,34 @@
 from typing import List
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
-from dependencies.publication_operations import PublicationOperations
-from dependencies.user_operations import UserOperations
+from dependencies.auth_dependencies.auth import get_current_user
+from dependencies.user_input_dependencies.publication_operations import (
+    PublicationOperations,
+)
+from schemas.common import ErrorResponseSchema
 from schemas.user_input_schemas.publication_schemas import (
     PublicationCreateSchema,
     PublicationResponseSchema,
     PublicationUpdateSchema,
 )
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponseSchema,
+            "description": "Forbidden Response",
+        }
+    },
+)
 
 
 @router.post(
-    "/create",
+    "/",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_201_CREATED: {
@@ -29,26 +41,19 @@ router = APIRouter()
     },
 )
 async def create_publication(
-    payload: PublicationCreateSchema, db: AsyncSession = Depends(get_db)
+    payload: PublicationCreateSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Create publication entry"""
     ops = PublicationOperations(db)
-    user_ops = UserOperations(db)
 
-    # Validate user exists
-    user = await user_ops.get_user_by_id(payload.user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"User with id {payload.user_id} not found",
-        )
-
-    publication = await ops.create_publication(payload)
+    publication = await ops.create_publication(payload, current_user.id)
     return publication
 
 
 @router.get(
-    "/list",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -58,14 +63,16 @@ async def create_publication(
     },
 )
 async def get_all_publications(
-    user_id: int = Query(..., description="User ID"),
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get all publications for a user"""
     ops = PublicationOperations(db)
-    publications = await ops.get_all_publications(user_id, skip=skip, limit=limit)
+    publications = await ops.get_all_publications(
+        current_user.id, skip=skip, limit=limit
+    )
     return publications
 
 
@@ -83,13 +90,13 @@ async def get_all_publications(
     },
 )
 async def get_publication_by_id(
-    publication_id: int,
-    user_id: int = Query(..., description="User ID"),
+    publication_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get single publication by ID"""
     ops = PublicationOperations(db)
-    publication = await ops.get_publication_by_id(publication_id, user_id)
+    publication = await ops.get_publication_by_id(publication_id, current_user.id)
 
     if not publication:
         raise HTTPException(
@@ -114,14 +121,14 @@ async def get_publication_by_id(
     },
 )
 async def update_publication(
-    publication_id: int,
+    publication_id: UUID,
     payload: PublicationUpdateSchema,
-    user_id: int = Query(..., description="User ID"),
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Update publication entry"""
     ops = PublicationOperations(db)
-    publication = await ops.update_publication(publication_id, user_id, payload)
+    publication = await ops.update_publication(publication_id, payload, current_user.id)
 
     if not publication:
         raise HTTPException(
@@ -145,13 +152,13 @@ async def update_publication(
     },
 )
 async def delete_publication(
-    publication_id: int,
-    user_id: int = Query(..., description="User ID"),
+    publication_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Delete publication entry"""
     ops = PublicationOperations(db)
-    deleted = await ops.delete_publication(publication_id, user_id)
+    deleted = await ops.delete_publication(publication_id, current_user.id)
 
     if not deleted:
         raise HTTPException(

@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -15,7 +16,7 @@ class CustomSectionBaseSchema(BaseModel):
 class CustomSectionCreateSchema(CustomSectionBaseSchema, ContentBaseSchema):
     """Schema for creating custom section"""
 
-    user_id: int
+    pass
 
 
 class CustomSectionUpdateSchema(BaseModel):
@@ -35,8 +36,8 @@ class CustomSectionResponseSchema(
 ):
     """Schema for custom section responses"""
 
-    id: int
-    user_id: int
+    id: UUID
+    user_id: UUID
     content_enhanced: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)

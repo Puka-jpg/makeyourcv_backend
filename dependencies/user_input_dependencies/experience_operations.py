@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,10 +15,12 @@ class ExperienceOperations:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_experience(self, payload: ExperienceCreateSchema) -> Experience:
+    async def create_experience(
+        self, payload: ExperienceCreateSchema, user_id: UUID
+    ) -> Experience:
         """Create experience in the database"""
         experience = Experience(
-            user_id=payload.user_id,
+            user_id=user_id,
             job_title=payload.job_title,
             company_name=payload.company_name,
             location=payload.location,
@@ -39,7 +42,7 @@ class ExperienceOperations:
         return experience
 
     async def get_all_experiences(
-        self, user_id: int, skip: int = 0, limit: int = 100
+        self, user_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[Experience]:
         """Retrieve all experiences for a user"""
         query = (
@@ -54,7 +57,7 @@ class ExperienceOperations:
         return list(experiences)
 
     async def get_experience_by_id(
-        self, experience_id: int, user_id: int
+        self, experience_id: UUID, user_id: UUID
     ) -> Optional[Experience]:
         """Retrieve single experience by ID"""
         query = select(Experience).where(
@@ -65,7 +68,7 @@ class ExperienceOperations:
         return experience
 
     async def update_experience(
-        self, experience_id: int, user_id: int, payload: ExperienceUpdateSchema
+        self, experience_id: UUID, user_id: UUID, payload: ExperienceUpdateSchema
     ) -> Optional[Experience]:
         """Update existing experience"""
         experience = await self.get_experience_by_id(experience_id, user_id)
@@ -102,7 +105,7 @@ class ExperienceOperations:
         await self.db.refresh(experience)
         return experience
 
-    async def delete_experience(self, experience_id: int, user_id: int) -> bool:
+    async def delete_experience(self, experience_id: UUID, user_id: UUID) -> bool:
         """Delete experience by ID"""
         experience = await self.get_experience_by_id(experience_id, user_id)
 

@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -9,6 +10,7 @@ from schemas.common import ContentBaseSchema, EnhancementMetadataSchema, Timesta
 class EducationBaseSchema(BaseModel):
     """Base schema for education"""
 
+    id: Optional[UUID]
     institution_name: str
     degree: str
     field_of_study: Optional[str] = None
@@ -23,7 +25,7 @@ class EducationBaseSchema(BaseModel):
 class EducationCreateSchema(EducationBaseSchema, ContentBaseSchema):
     """Schema for creating education"""
 
-    user_id: int
+    pass
 
 
 class EducationUpdateSchema(BaseModel):
@@ -40,6 +42,8 @@ class EducationUpdateSchema(BaseModel):
     description: Optional[str] = None
     display_order: Optional[int] = None
     is_active: Optional[bool] = None
+    id: Optional[UUID]
+    user_id: Optional[UUID]
 
 
 class EducationResponseSchema(
@@ -47,8 +51,6 @@ class EducationResponseSchema(
 ):
     """Schema for education responses"""
 
-    id: int
-    user_id: int
     description_enhanced: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)

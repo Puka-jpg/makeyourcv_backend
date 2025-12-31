@@ -1,5 +1,6 @@
 from datetime import date
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -21,7 +22,7 @@ class CertificationBaseSchema(BaseModel):
 class CertificationCreateSchema(CertificationBaseSchema, ContentBaseSchema):
     """Schema for creating certification"""
 
-    user_id: int
+    pass
 
 
 class CertificationUpdateSchema(BaseModel):
@@ -46,8 +47,8 @@ class CertificationResponseSchema(
 ):
     """Schema for certification responses"""
 
-    id: int
-    user_id: int
+    id: UUID
+    user_id: UUID
     description_enhanced: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)

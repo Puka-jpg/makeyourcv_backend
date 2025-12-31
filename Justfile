@@ -32,15 +32,9 @@ spellcheck:
     uv run codespell --skip="*.git,*.json,package-lock.json" .
 
 test:
-    docker compose -f docker-compose.test.yml up -d
-    @echo "Waiting 5 seconds for docker services to be healthy..."
-    sleep 5
     ENV_FILE=.env.test uv run pytest
 
 dev:
-    docker compose up -d
-    @echo "Waiting 5 seconds for docker services to be healthy..."
-    sleep 5
     uv run uvicorn main:app \
         --reload \
         --host 127.0.0.1 \
@@ -51,11 +45,6 @@ dev:
 migrate:
     uv run alembic upgrade head
 
-clean:
-    docker compose down -v
-
-clean-test:
-    docker compose -f docker-compose.test.yml down -v
 
 generate-configs:
     uv run generate_configs.py

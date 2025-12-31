@@ -10,6 +10,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from db import sessionmanager
+from routes.auth_routes.auth import router as auth_routes
 from routes.user_input_routes.certification_routes import router as certification_routes
 from routes.user_input_routes.custom_section_routes import (
     router as custom_section_routes,
@@ -98,6 +99,7 @@ async def logging_middleware(
     return response
 
 
+app.include_router(auth_routes, prefix="/api/auth", tags=["Auth"])
 app.include_router(user_routes, prefix="/api/users", tags=["User Management"])
 app.include_router(
     personal_info_routes, prefix="/api/personal-info", tags=["Personal Info"]

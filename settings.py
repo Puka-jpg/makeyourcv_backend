@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
 
+    # JWT settings
+    JWT_REFRESH_EXPIRATION_MINUTES: int = (
+        15 * 24 * 60
+    )  # 15 days: int = 15 * 24 * 60  # 15 days
+    JWT_ACCESS_EXPIRATION_MINUTES: int = 30  # 15 minutes
+    JWT_SECRET: str = "topsecretkey"
+
     # Gunicorn settings
     GUNICORN_WORKERS: int = 1
     GUNICORN_THREADS: int = 8

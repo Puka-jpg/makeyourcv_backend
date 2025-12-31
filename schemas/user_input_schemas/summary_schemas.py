@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -14,7 +15,7 @@ class SummaryBaseSchema(BaseModel):
 class SummaryCreateSchema(SummaryBaseSchema):
     """Schema for creating a summary"""
 
-    user_id: int
+    pass
 
 
 class SummaryUpdateSchema(BaseModel):
@@ -28,8 +29,8 @@ class SummaryResponseSchema(
 ):
     """Schema for summary responses"""
 
-    id: int
-    user_id: int
+    id: UUID
+    user_id: UUID
     summary_enhanced: Optional[str] = None
     is_ai_generated: bool = False
 

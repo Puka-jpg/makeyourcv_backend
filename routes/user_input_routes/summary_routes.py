@@ -2,19 +2,28 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
-from dependencies.summary_operations import SummaryOperations
-from dependencies.user_operations import UserOperations
+from dependencies.auth_dependencies.auth import get_current_user
+from dependencies.user_input_dependencies.summary_operations import SummaryOperations
+from schemas.common import ErrorResponseSchema
 from schemas.user_input_schemas.summary_schemas import (
     SummaryCreateSchema,
     SummaryResponseSchema,
     SummaryUpdateSchema,
 )
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponseSchema,
+            "description": "Forbidden Response",
+        }
+    },
+)
 
 
 @router.post(
-    "/create",
+    "/",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_201_CREATED: {
@@ -27,33 +36,25 @@ router = APIRouter()
     },
 )
 async def create_summary(
-    payload: SummaryCreateSchema, db: AsyncSession = Depends(get_db)
+    payload: SummaryCreateSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
-    """Create a summary for a user"""
+    """Create a summary for the current user"""
     ops = SummaryOperations(db)
-    user_ops = UserOperations(db)
-
-    # Validate user exists
-    user = await user_ops.get_user_by_id(payload.user_id)
-    if not user:
+    existing = await ops.get_summary_by_user_id(current_user.id)
+    if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"User with id {payload.user_id} not found",
+            detail="Summary already exists for this user. Use PUT to update.",
         )
 
-    # Check if summary already exists
-    if await ops.summary_exists(payload.user_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Summary already exists for user {payload.user_id}",
-        )
-
-    summary = await ops.create_summary(payload)
+    summary = await ops.create_summary(payload, user_id=current_user.id)
     return summary
 
 
 @router.get(
-    "/user/{user_id}",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -65,49 +66,25 @@ async def create_summary(
         },
     },
 )
-async def get_summary_by_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    """Get summary for a user"""
+async def get_my_summary(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Get current user's summary"""
     ops = SummaryOperations(db)
-    summary = await ops.get_summary_by_user_id(user_id)
+    summary = await ops.get_summary_by_user_id(current_user.id)
 
     if not summary:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Summary not found for user {user_id}",
-        )
-
-    return summary
-
-
-@router.get(
-    "/{summary_id}",
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_200_OK: {
-            "model": SummaryResponseSchema,
-            "description": "Summary retrieved successfully",
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "description": "Summary not found",
-        },
-    },
-)
-async def get_summary_by_id(summary_id: int, db: AsyncSession = Depends(get_db)):
-    """Get summary by ID"""
-    ops = SummaryOperations(db)
-    summary = await ops.get_summary_by_id(summary_id)
-
-    if not summary:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Summary with id {summary_id} not found",
+            detail="Summary not found",
         )
 
     return summary
 
 
 @router.put(
-    "/{summary_id}",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -119,26 +96,26 @@ async def get_summary_by_id(summary_id: int, db: AsyncSession = Depends(get_db))
         },
     },
 )
-async def update_summary(
-    summary_id: int,
+async def update_my_summary(
     payload: SummaryUpdateSchema,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
-    """Update summary"""
+    """Update current user's summary"""
     ops = SummaryOperations(db)
-    summary = await ops.update_summary(summary_id, payload)
+    summary = await ops.update_summary_by_user(current_user.id, payload)
 
     if not summary:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Summary with id {summary_id} not found",
+            detail="Summary not found",
         )
 
     return summary
 
 
 @router.delete(
-    "/{summary_id}",
+    "/",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         status.HTTP_204_NO_CONTENT: {
@@ -149,15 +126,18 @@ async def update_summary(
         },
     },
 )
-async def delete_summary(summary_id: int, db: AsyncSession = Depends(get_db)):
-    """Delete summary"""
+async def delete_my_summary(
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Delete current user's summary"""
     ops = SummaryOperations(db)
-    deleted = await ops.delete_summary(summary_id)
+    deleted = await ops.delete_summary_by_user(current_user.id)
 
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Summary with id {summary_id} not found",
+            detail="Summary not found",
         )
 
     return None

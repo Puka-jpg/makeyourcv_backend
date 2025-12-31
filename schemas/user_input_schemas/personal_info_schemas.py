@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
@@ -21,7 +22,7 @@ class PersonalInfoBaseSchema(BaseModel):
 class PersonalInfoCreateSchema(PersonalInfoBaseSchema):
     """Schema for creating personal info"""
 
-    user_id: int
+    pass
 
 
 class PersonalInfoUpdateSchema(BaseModel):
@@ -41,8 +42,8 @@ class PersonalInfoUpdateSchema(BaseModel):
 class PersonalInfoResponseSchema(PersonalInfoBaseSchema):
     """Schema for personal info responses - includes ID and metadata"""
 
-    id: int
-    user_id: int
+    id: UUID
+    user_id: UUID
     created_at: datetime
     updated_at: Optional[datetime] = None
 

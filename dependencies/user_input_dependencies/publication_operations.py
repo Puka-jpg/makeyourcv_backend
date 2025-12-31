@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,10 +15,12 @@ class PublicationOperations:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_publication(self, payload: PublicationCreateSchema) -> Publication:
+    async def create_publication(
+        self, payload: PublicationCreateSchema, user_id: UUID
+    ) -> Publication:
         """Create publication in the database"""
         publication = Publication(
-            user_id=payload.user_id,
+            user_id=user_id,
             title=payload.title,
             authors=payload.authors,
             publication_venue=payload.publication_venue,
@@ -35,7 +38,7 @@ class PublicationOperations:
         return publication
 
     async def get_all_publications(
-        self, user_id: int, skip: int = 0, limit: int = 100
+        self, user_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[Publication]:
         """Retrieve all publications for a user"""
         query = (
@@ -50,7 +53,7 @@ class PublicationOperations:
         return list(publications)
 
     async def get_publication_by_id(
-        self, publication_id: int, user_id: int
+        self, publication_id: UUID, user_id: UUID
     ) -> Optional[Publication]:
         """Retrieve single publication by ID"""
         query = select(Publication).where(
@@ -61,7 +64,10 @@ class PublicationOperations:
         return publication
 
     async def update_publication(
-        self, publication_id: int, user_id: int, payload: PublicationUpdateSchema
+        self,
+        publication_id: UUID,
+        payload: PublicationUpdateSchema,
+        user_id: UUID,
     ) -> Optional[Publication]:
         """Update existing publication"""
         publication = await self.get_publication_by_id(publication_id, user_id)
@@ -92,7 +98,7 @@ class PublicationOperations:
         await self.db.refresh(publication)
         return publication
 
-    async def delete_publication(self, publication_id: int, user_id: int) -> bool:
+    async def delete_publication(self, publication_id: UUID, user_id: UUID) -> bool:
         """Delete publication by ID"""
         publication = await self.get_publication_by_id(publication_id, user_id)
 

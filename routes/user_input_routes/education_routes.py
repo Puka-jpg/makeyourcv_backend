@@ -1,22 +1,34 @@
 from typing import List
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
-from dependencies.education_operations import EducationOperations
-from dependencies.user_operations import UserOperations
+from dependencies.auth_dependencies.auth import get_current_user
+from dependencies.user_input_dependencies.education_operations import (
+    EducationOperations,
+)
+from schemas.common import ErrorResponseSchema
 from schemas.user_input_schemas.education_schemas import (
     EducationCreateSchema,
     EducationResponseSchema,
     EducationUpdateSchema,
 )
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponseSchema,
+            "description": "Forbidden Response",
+        }
+    },
+)
 
 
 @router.post(
-    "/create",
+    "/",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_201_CREATED: {
@@ -29,26 +41,19 @@ router = APIRouter()
     },
 )
 async def create_education(
-    payload: EducationCreateSchema, db: AsyncSession = Depends(get_db)
+    payload: EducationCreateSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Create education entry"""
     ops = EducationOperations(db)
-    user_ops = UserOperations(db)
 
-    # Validate user exists
-    user = await user_ops.get_user_by_id(payload.user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"User with id {payload.user_id} not found",
-        )
-
-    education = await ops.create_education(payload)
+    education = await ops.create_education(payload, user_id=current_user.id)
     return education
 
 
 @router.get(
-    "/list",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -58,14 +63,16 @@ async def create_education(
     },
 )
 async def get_all_education(
-    user_id: int = Query(..., description="User ID"),
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get all education entries for a user"""
     ops = EducationOperations(db)
-    education_list = await ops.get_all_education(user_id, skip=skip, limit=limit)
+    education_list = await ops.get_all_education(
+        user_id=current_user.id, skip=skip, limit=limit
+    )
     return education_list
 
 
@@ -83,13 +90,13 @@ async def get_all_education(
     },
 )
 async def get_education_by_id(
-    education_id: int,
-    user_id: int = Query(..., description="User ID"),
+    education_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get single education entry by ID"""
     ops = EducationOperations(db)
-    education = await ops.get_education_by_id(education_id, user_id)
+    education = await ops.get_education_by_id(education_id, current_user.id)
 
     if not education:
         raise HTTPException(
@@ -114,14 +121,14 @@ async def get_education_by_id(
     },
 )
 async def update_education(
-    education_id: int,
+    education_id: UUID,
     payload: EducationUpdateSchema,
-    user_id: int = Query(..., description="User ID"),
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Update education entry"""
     ops = EducationOperations(db)
-    education = await ops.update_education(education_id, user_id, payload)
+    education = await ops.update_education(education_id, payload, current_user.id)
 
     if not education:
         raise HTTPException(
@@ -145,13 +152,13 @@ async def update_education(
     },
 )
 async def delete_education(
-    education_id: int,
-    user_id: int = Query(..., description="User ID"),
+    education_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Delete education entry"""
     ops = EducationOperations(db)
-    deleted = await ops.delete_education(education_id, user_id)
+    deleted = await ops.delete_education(education_id, current_user.id)
 
     if not deleted:
         raise HTTPException(

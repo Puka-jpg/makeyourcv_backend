@@ -1,22 +1,32 @@
 from typing import List
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
-from dependencies.project_operations import ProjectOperations
-from dependencies.user_operations import UserOperations
+from dependencies.auth_dependencies.auth import get_current_user
+from dependencies.user_input_dependencies.project_operations import ProjectOperations
+from schemas.common import ErrorResponseSchema
 from schemas.user_input_schemas.project_schemas import (
     ProjectCreateSchema,
     ProjectResponseSchema,
     ProjectUpdateSchema,
 )
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponseSchema,
+            "description": "Forbidden Response",
+        }
+    },
+)
 
 
 @router.post(
-    "/create",
+    "/",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_201_CREATED: {
@@ -29,26 +39,18 @@ router = APIRouter()
     },
 )
 async def create_project(
-    payload: ProjectCreateSchema, db: AsyncSession = Depends(get_db)
+    payload: ProjectCreateSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Create project entry"""
     ops = ProjectOperations(db)
-    user_ops = UserOperations(db)
-
-    # Validate user exists
-    user = await user_ops.get_user_by_id(payload.user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"User with id {payload.user_id} not found",
-        )
-
-    project = await ops.create_project(payload)
+    project = await ops.create_project(payload, current_user.id)
     return project
 
 
 @router.get(
-    "/list",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -58,14 +60,14 @@ async def create_project(
     },
 )
 async def get_all_projects(
-    user_id: int = Query(..., description="User ID"),
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get all projects for a user"""
     ops = ProjectOperations(db)
-    projects = await ops.get_all_projects(user_id, skip=skip, limit=limit)
+    projects = await ops.get_all_projects(current_user.id, skip=skip, limit=limit)
     return projects
 
 
@@ -83,13 +85,13 @@ async def get_all_projects(
     },
 )
 async def get_project_by_id(
-    project_id: int,
-    user_id: int = Query(..., description="User ID"),
+    project_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get single project by ID"""
     ops = ProjectOperations(db)
-    project = await ops.get_project_by_id(project_id, user_id)
+    project = await ops.get_project_by_id(project_id, current_user.id)
 
     if not project:
         raise HTTPException(
@@ -114,14 +116,14 @@ async def get_project_by_id(
     },
 )
 async def update_project(
-    project_id: int,
+    project_id: UUID,
     payload: ProjectUpdateSchema,
-    user_id: int = Query(..., description="User ID"),
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Update project entry"""
     ops = ProjectOperations(db)
-    project = await ops.update_project(project_id, user_id, payload)
+    project = await ops.update_project(project_id, current_user.id, payload)
 
     if not project:
         raise HTTPException(
@@ -145,13 +147,13 @@ async def update_project(
     },
 )
 async def delete_project(
-    project_id: int,
-    user_id: int = Query(..., description="User ID"),
+    project_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Delete project entry"""
     ops = ProjectOperations(db)
-    deleted = await ops.delete_project(project_id, user_id)
+    deleted = await ops.delete_project(project_id, current_user.id)
 
     if not deleted:
         raise HTTPException(

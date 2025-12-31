@@ -1,4 +1,5 @@
 from typing import List, Optional
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,11 +16,11 @@ class CertificationOperations:
         self.db = db
 
     async def create_certification(
-        self, payload: CertificationCreateSchema
+        self, payload: CertificationCreateSchema, user_id: UUID
     ) -> Certification:
         """Create certification in the database"""
         certification = Certification(
-            user_id=payload.user_id,
+            user_id=user_id,
             certification_name=payload.certification_name,
             issuing_organization=payload.issuing_organization,
             issue_date=payload.issue_date,
@@ -37,7 +38,7 @@ class CertificationOperations:
         return certification
 
     async def get_all_certifications(
-        self, user_id: int, skip: int = 0, limit: int = 100
+        self, user_id: UUID, skip: int = 0, limit: int = 100
     ) -> List[Certification]:
         """Retrieve all certifications for a user"""
         query = (
@@ -52,7 +53,7 @@ class CertificationOperations:
         return list(certifications)
 
     async def get_certification_by_id(
-        self, certification_id: int, user_id: int
+        self, certification_id: UUID, user_id: UUID
     ) -> Optional[Certification]:
         """Retrieve single certification by ID"""
         query = select(Certification).where(
@@ -63,7 +64,7 @@ class CertificationOperations:
         return certification
 
     async def update_certification(
-        self, certification_id: int, user_id: int, payload: CertificationUpdateSchema
+        self, certification_id: UUID, user_id: UUID, payload: CertificationUpdateSchema
     ) -> Optional[Certification]:
         """Update existing certification"""
         certification = await self.get_certification_by_id(certification_id, user_id)
@@ -94,7 +95,7 @@ class CertificationOperations:
         await self.db.refresh(certification)
         return certification
 
-    async def delete_certification(self, certification_id: int, user_id: int) -> bool:
+    async def delete_certification(self, certification_id: UUID, user_id: UUID) -> bool:
         """Delete certification by ID"""
         certification = await self.get_certification_by_id(certification_id, user_id)
 

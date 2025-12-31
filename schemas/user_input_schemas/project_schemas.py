@@ -1,5 +1,6 @@
 from datetime import date
 from typing import List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -23,7 +24,7 @@ class ProjectBaseSchema(BaseModel):
 class ProjectCreateSchema(ProjectBaseSchema, ContentBaseSchema):
     """Schema for creating project"""
 
-    user_id: int
+    pass
 
 
 class ProjectUpdateSchema(BaseModel):
@@ -47,8 +48,8 @@ class ProjectResponseSchema(
 ):
     """Schema for project responses"""
 
-    id: int
-    user_id: int
+    id: UUID
+    user_id: UUID
     description_enhanced: Optional[str] = None
     highlights_enhanced: Optional[List[str]] = None
 

@@ -1,5 +1,6 @@
 from datetime import date
 from typing import List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -24,7 +25,7 @@ class ExperienceBaseSchema(BaseModel):
 class ExperienceCreateSchema(ExperienceBaseSchema, ContentBaseSchema):
     """Schema for creating experience"""
 
-    user_id: int
+    pass
 
 
 class ExperienceUpdateSchema(BaseModel):
@@ -49,8 +50,8 @@ class ExperienceResponseSchema(
 ):
     """Schema for experience responses"""
 
-    id: int
-    user_id: int
+    id: UUID
+    user_id: UUID
     description_enhanced: Optional[str] = None
     achievements_enhanced: Optional[List[str]] = None
 

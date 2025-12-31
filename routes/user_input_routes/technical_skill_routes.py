@@ -1,54 +1,54 @@
 from typing import List
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import get_db
-from dependencies.technical_skill_operations import TechnicalSkillOperations
-from dependencies.user_operations import UserOperations
+from dependencies.auth_dependencies.auth import get_current_user
+from dependencies.user_input_dependencies.technical_skill_operations import (
+    TechnicalSkillOperations,
+)
+from schemas.common import ErrorResponseSchema
 from schemas.user_input_schemas.technical_skill_schemas import (
     TechnicalSkillCreateSchema,
     TechnicalSkillResponseSchema,
     TechnicalSkillUpdateSchema,
 )
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)],
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponseSchema,
+            "description": "Forbidden Response",
+        }
+    },
+)
 
 
 @router.post(
-    "/create",
+    "/",
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_201_CREATED: {
             "model": TechnicalSkillResponseSchema,
             "description": "Technical skill created successfully",
         },
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "User not found",
-        },
     },
 )
 async def create_technical_skill(
-    payload: TechnicalSkillCreateSchema, db: AsyncSession = Depends(get_db)
+    payload: TechnicalSkillCreateSchema,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
-    """Create technical skill entry"""
     ops = TechnicalSkillOperations(db)
-    user_ops = UserOperations(db)
-
-    # Validate user exists
-    user = await user_ops.get_user_by_id(payload.user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"User with id {payload.user_id} not found",
-        )
-
-    skill = await ops.create_technical_skill(payload)
-    return skill
+    experience = await ops.create_technical_skill(payload, user_id=current_user.id)
+    return experience
 
 
 @router.get(
-    "/list",
+    "/",
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_200_OK: {
@@ -58,14 +58,14 @@ async def create_technical_skill(
     },
 )
 async def get_all_technical_skills(
-    user_id: int = Query(..., description="User ID"),
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get all technical skills for a user"""
     ops = TechnicalSkillOperations(db)
-    skills = await ops.get_all_technical_skills(user_id, skip=skip, limit=limit)
+    skills = await ops.get_all_technical_skills(current_user.id, skip=skip, limit=limit)
     return skills
 
 
@@ -83,13 +83,13 @@ async def get_all_technical_skills(
     },
 )
 async def get_technical_skill_by_id(
-    skill_id: int,
-    user_id: int = Query(..., description="User ID"),
+    skill_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Get single technical skill by ID"""
     ops = TechnicalSkillOperations(db)
-    skill = await ops.get_technical_skill_by_id(skill_id, user_id)
+    skill = await ops.get_technical_skill_by_id(skill_id, current_user.id)
 
     if not skill:
         raise HTTPException(
@@ -114,14 +114,14 @@ async def get_technical_skill_by_id(
     },
 )
 async def update_technical_skill(
-    skill_id: int,
+    skill_id: UUID,
     payload: TechnicalSkillUpdateSchema,
-    user_id: int = Query(..., description="User ID"),
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Update technical skill entry"""
     ops = TechnicalSkillOperations(db)
-    skill = await ops.update_technical_skill(skill_id, user_id, payload)
+    skill = await ops.update_technical_skill(skill_id, current_user.id, payload)
 
     if not skill:
         raise HTTPException(
@@ -145,13 +145,13 @@ async def update_technical_skill(
     },
 )
 async def delete_technical_skill(
-    skill_id: int,
-    user_id: int = Query(..., description="User ID"),
+    skill_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """Delete technical skill entry"""
     ops = TechnicalSkillOperations(db)
-    deleted = await ops.delete_technical_skill(skill_id, user_id)
+    deleted = await ops.delete_technical_skill(skill_id, current_user.id)
 
     if not deleted:
         raise HTTPException(

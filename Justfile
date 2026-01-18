@@ -28,6 +28,9 @@ format:
     uv run ruff check --fix .
     uv run ruff format .
 
+pyright:
+    uv run pyright .
+
 spellcheck:
     uv run codespell --skip="*.git,*.json,package-lock.json" .
 

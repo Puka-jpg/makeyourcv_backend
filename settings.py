@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     JWT_ACCESS_EXPIRATION_MINUTES: int = 30  # 15 minutes
     JWT_SECRET: str = "topsecretkey"
 
+    # AI Settings
+    OPENAI_API_KEY: str = ""
+
     # Gunicorn settings
     GUNICORN_WORKERS: int = 1
     GUNICORN_THREADS: int = 8

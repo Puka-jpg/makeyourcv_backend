@@ -16,29 +16,29 @@ help:
     @echo
 
 install:
-    cd backend && uv sync --frozen
+    uv sync --frozen
 
 lint:
-    cd backend && uv run ruff check .
+    uv run ruff check .
 
 mypy:
-    cd backend && uv run mypy .
+    uv run mypy .
 
 format:
-    cd backend && uv run ruff check --fix .
-    cd backend && uv run ruff format .
+    uv run ruff check --fix .
+    uv run ruff format .
 
 pyright:
-    cd backend && uv run pyright .
+    uv run pyright .
 
 spellcheck:
-    cd backend && uv run codespell --skip="*.git,*.json,package-lock.json" .
+    uv run codespell --skip="*.git,*.json,package-lock.json" .
 
 test:
-    cd backend && ENV_FILE=.env.test uv run pytest
+    ENV_FILE=.env.test uv run pytest
 
 dev:
-    cd backend && uv run uvicorn main:app \
+    uv run uvicorn main:app \
         --reload \
         --host 127.0.0.1 \
         --port 8080 \
@@ -46,14 +46,8 @@ dev:
         --log-level info
 
 migrate:
-    cd backend && uv run alembic upgrade head
+    uv run alembic upgrade head
 
 
 generate-configs:
-    cd backend && uv run generate_configs.py
-
-clean:
-    @echo "Clean not implemented for local dev yet"
-
-clean-test:
-    @echo "Clean-test not implemented for local dev yet"
+    uv run generate_configs.py

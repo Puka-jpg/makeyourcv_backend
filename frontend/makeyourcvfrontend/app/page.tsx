@@ -4,6 +4,7 @@ import { BentoSection } from "@/components/bento-section"
 import { CTASection } from "@/components/cta-section"
 import { FooterSection } from "@/components/footer-section"
 import { AnimatedSection } from "@/components/animated-section"
+import { AgentChatWidget } from "@/components/agent-chat-widget"
 
 export default function LandingPage() {
   return (
@@ -28,6 +29,9 @@ export default function LandingPage() {
           <FooterSection />
         </AnimatedSection>
       </div>
+
+      {/* Agent Chat Widget */}
+      <AgentChatWidget />
     </div>
   )
 }

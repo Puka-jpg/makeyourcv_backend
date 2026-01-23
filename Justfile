@@ -3,17 +3,23 @@ default:
 
 help:
     @echo
-    @echo "install                  -- install backend dependencies"
-    @echo "format                   -- format backend"
-    @echo "lint                     -- lint backend"
-    @echo "mypy                     -- type check backend"
-    @echo "spellcheck               -- spell check"
-    @echo "test                     -- test backend"
-    @echo "dev                      -- start backend development server"
-    @echo "generate-configs         -- generate deployment configs"
-    @echo "clean                    -- remove backend containers and volumes"
-    @echo "clean-test               -- remove test containers and volumes"
+    @echo "Backend Commands:"
+    @echo "  install                  -- install backend dependencies (uv)"
+    @echo "  format                   -- format backend code"
+    @echo "  lint                     -- lint backend code"
+    @echo "  test                     -- run backend tests"
+    @echo "  dev                      -- start backend API server (fastapi)"
     @echo
+    @echo "Agent Commands:"
+    @echo "  agent-dev                -- run agent in CLI mode"
+    @echo "  agent-server             -- run agent WebSocket server (port 8000)"
+    @echo
+    @echo "Frontend Commands:"
+    @echo "  frontend-install         -- install frontend dependencies (npm)"
+    @echo "  frontend-dev             -- start frontend dev server (next.js)"
+    @echo
+
+# --- Backend ---
 
 install:
     cd backend && uv sync --frozen
@@ -48,7 +54,6 @@ dev:
 migrate:
     cd backend && uv run alembic upgrade head
 
-
 generate-configs:
     cd backend && uv run generate_configs.py
 
@@ -57,3 +62,19 @@ clean:
 
 clean-test:
     @echo "Clean-test not implemented for local dev yet"
+
+# --- Agent ---
+
+agent-dev:
+    cd backend && PYTHONPATH=.. uv run ../agent/main.py
+
+agent-server:
+    cd backend && PYTHONPATH=.. PORT=8005 uv run python ../agent/server.py
+
+# --- Frontend ---
+
+frontend-install:
+    cd frontend/makeyourcvfrontend && npm install
+
+frontend-dev:
+    cd frontend/makeyourcvfrontend && npm run dev

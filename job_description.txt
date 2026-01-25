@@ -1,0 +1,51 @@
+Company Overview:
+TIME Charge N Go is at the forefront of the Electric Vehicle Charging Station (EVCS) industry, dedicated to advancing clean mobility through innovative and sustainable solutions. As a leader in this rapidly growing sector, we offer exceptional opportunities for career development and growth.
+ 
+Position Summary:
+We are looking for a Software Engineer with a focus on Solution Architecture to join our team. In this role, you will be responsible for evaluating, designing, and implementing technological solutions that meet business requirements. The ideal candidate will have strong programming skills (preferably in Python), expertise in data analysis using Excel, and experience in creating and analyzing requirements documents. This role bridges the gap between software engineering and solution architecture, ensuring that technology solutions align with organizational goals and processes.
+ 
+Key Responsibilities:
+ 
+1) Solution Design & Implementation:
+Collaborate with cross-functional teams to understand business processes and identify software needs.
+Design scalable, reliable, and cost-effective software solutions that integrate with existing systems.
+Cross-analyze various software options and tools to recommend the best fit for business requirements.
+2) Requirements Gathering & Analysis:
+Work closely with the departments to gather detailed technical and functional requirements.
+Create comprehensive requirements documentation outlining business needs, system specifications, and technical solutions.
+Analyze, validate, and ensure alignment between business requirements and solution capabilities.
+3) Data Analysis & Excel Expertise:
+Use advanced Excel skills to analyze data, create reports, and support decision-making.
+Develop data models and perform data analytics to derive insights that drive technology and software selection.
+4) Programming & Development:
+Write and maintain scripts, particularly in Python, to automate processes or integrate software solutions.
+Collaborate with the development team to build, test, and deploy new software solutions.
+Troubleshoot, debug, and optimize software performance as needed.
+5) Evaluation of Technology Solutions:
+Conduct research on potential software platforms, tools, and systems that fit within the organization's technology stack.
+Compare and assess various solutions against functional, technical, and budgetary requirements.
+Provide recommendations to management based on comprehensive software evaluation.
+6) Documentation & Communication:
+Create detailed technical documentation, including architecture diagrams, integration plans, and workflows.
+Communicate technical concepts to non-technical stakeholders, bridging the gap between IT and business teams.
+ 
+Qualifications:
+Bachelor’s degree in computer science, Engineering, or related field.
+2-5 years of experience in software engineering; experience with or certification in Power Platform is a plus.
+Strong programming skills, particularly in Python.
+Familiarity with databases (SQL, NoSQL) and API integrations.
+Knowledge of cloud platforms, Devops and IoT products is an advantage.
+ 
+Preferred Qualifications:
+· Master’s degree in computer science, Engineering, or a related field.
+· Experience with cloud platforms such as AWS, Azure, or Google Cloud.
+· Knowledge of IoT technologies and their application in EV charging solutions.
+· Proficiency in other programming languages like JavaScript, Java, or C#.
+· Familiarity with agile methodologies and project management tools like JIRA or Trello.
+· Certification in software architecture, cloud computing, or relevant technologies.
+· Demonstrated experience in designing and implementing scalable software architectures.
+· Understanding of the EV charging ecosystem, including industry standards and regulations.
+· Strong analytical skills with experience in business intelligence tools like Power BI or Tableau.
+ 
+How to Apply:
+If you are passionate about the EV industry and ready to contribute to our success, please submit your application here. And do email to anush.lamsal@timechargengo.com

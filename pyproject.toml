@@ -23,6 +23,8 @@ dependencies = [
     "python-multipart>=0.0.21",
     "pypdf2>=3.0.1",
     "openai>=1.10.0",
+    "google-adk>=1.20.0",
+    "types-pyyaml>=6.0.12.20250915",
 ]
 
 [dependency-groups]
@@ -37,7 +39,12 @@ dev= [
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
+exclude = ["adk_test_projects", "tests", "reproduce_issue.py"]
+
+[tool.ruff]
+exclude = ["adk_test_projects", "tests", "reproduce_issue.py"]
 
 [tool.ruff.lint]
 ignore = ["E501"]
 extend-select = ["E", "I", "F", "G", "N", "T201"]
+

@@ -69,73 +69,35 @@ async def call_agent_async(runner, user_id, session_id, query):
             is_final = event.is_final_response()
             has_content = event.content is not None
 
-            # Extract text preview from content if available
-            text_preview = None
-            if has_content and event.content.parts:
-                for part in event.content.parts:
-                    if hasattr(part, "text") and part.text:
-                        text_preview = (
-                            part.text[:100] if len(part.text) > 100 else part.text
-                        )
-                        break
-
-            # Log every event for debugging
-            logger.info(
-                "Agent event received",
-                extra={
-                    "event_num": event_count,
-                    "author": author,
-                    "is_final": is_final,
-                    "has_content": has_content,
-                    "num_parts": len(event.content.parts) if has_content else 0,
-                    "text_preview": text_preview,
-                },
-            )
+            # Only log significant events (Final or Tool calls)
+            if is_final or (
+                has_content
+                and event.content.parts
+                and any(p.function_call for p in event.content.parts)
+            ):
+                logger.info(
+                    "Agent Event",
+                    extra={
+                        "event_num": event_count,
+                        "author": author,
+                        "is_final": is_final,
+                        "has_tool_call": True
+                        if has_content
+                        and any(p.function_call for p in event.content.parts)
+                        else False,
+                    },
+                )
 
             # Collect any text from this event
             if event.content and event.content.parts:
-                for i, part in enumerate(event.content.parts):
-                    part_type = type(part).__name__
-                    has_text = hasattr(part, "text") and part.text
-                    has_func = hasattr(part, "function_call") and part.function_call
-                    has_tool_resp = (
-                        hasattr(part, "function_response") and part.function_response
-                    )
+                for p in event.content.parts:
+                    if hasattr(p, "text") and p.text:
+                        all_text_responses.append(p.text)
 
-                    logger.info(
-                        "Event part details",
-                        extra={
-                            "event_num": event_count,
-                            "part_num": i,
-                            "part_type": part_type,
-                            "has_text": has_text,
-                            "text_length": len(part.text) if has_text else 0,
-                            "text_content": part.text if has_text else None,
-                            "function_call": part.function_call.name
-                            if has_func
-                            else None,
-                            "function_response": "present" if has_tool_resp else None,
-                        },
-                    )
-
-                    if has_text:
-                        all_text_responses.append(part.text)
-                        logger.info(
-                            "Collected text response",
-                            extra={
-                                "total_responses": len(all_text_responses),
-                                "text_preview": part.text[:100],
-                            },
-                        )
-
-            # Also process for logging
+            # Also process for logging/final response extraction
             response = await process_agent_response(event)
             if response:
                 final_response_text = response
-                logger.info(
-                    "[FINAL_RESPONSE_SET] Final response captured",
-                    extra={"response_preview": response[:100] if response else None},
-                )
 
     except Exception as e:
         logger.exception(
@@ -148,11 +110,7 @@ async def call_agent_async(runner, user_id, session_id, query):
         "[AGENT_CALL_COMPLETE] Agent run complete",
         extra={
             "total_events": event_count,
-            "text_responses_collected": len(all_text_responses),
             "has_final_response": final_response_text is not None,
-            "all_responses_preview": [r[:50] for r in all_text_responses]
-            if all_text_responses
-            else [],
         },
     )
 

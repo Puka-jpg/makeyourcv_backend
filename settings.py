@@ -38,9 +38,9 @@ class Settings(BaseSettings):
     OPENROUTER_MODEL: str = ""
 
     # Gunicorn settings
-    GUNICORN_WORKERS: int = 1
-    GUNICORN_THREADS: int = 8
-    GUNICORN_TIMEOUT: int = 120
+    GUNICORN_WORKERS: int = 4
+    GUNICORN_THREADS: int = 1  # Uvicorn workers don't use Gunicorn threads
+    GUNICORN_TIMEOUT: int = 300
     GUNICORN_ACCESS_LOG: str = "-"
     GUNICORN_ERROR_LOG: str = "-"
 

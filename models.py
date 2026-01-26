@@ -88,17 +88,9 @@ class Resume(Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     job_description: Mapped[str] = mapped_column(Text, nullable=False)
-    company_name: Mapped[Optional[str]] = mapped_column(String(255))
-    position_title: Mapped[Optional[str]] = mapped_column(String(255))
-    generated_content: Mapped[Optional[str]] = mapped_column(Text)
-    file_path: Mapped[Optional[str]] = mapped_column(String(500))
     status: Mapped[str] = mapped_column(
         String(50), default="processing", nullable=False
     )
-    error_message: Mapped[Optional[str]] = mapped_column(Text)
-
-    # Track which prompt was used for generation
-    generation_prompt_used: Mapped[Optional[str]] = mapped_column(Text)
 
     # Content storage (DB-Centric)
     raw_resume_text: Mapped[Optional[str]] = mapped_column(Text)

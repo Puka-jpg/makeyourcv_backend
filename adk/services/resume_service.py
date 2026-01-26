@@ -35,11 +35,16 @@ class ResumeService:
         )
         await self.session.execute(stmt)
         await self.session.commit()
+        logger.info(
+            "Updated raw_resume_text",
+            extra={"resume_id": str(resume_id), "text_len": len(text)},
+        )
 
     async def update_job_description(self, resume_id: UUID, text: str):
         stmt = update(Resume).where(Resume.id == resume_id).values(job_description=text)
         await self.session.execute(stmt)
         await self.session.commit()
+        logger.info("Updated job_description", extra={"resume_id": str(resume_id)})
 
     async def update_tailored_content(self, resume_id: UUID, content_json: str):
         stmt = (
@@ -49,6 +54,7 @@ class ResumeService:
         )
         await self.session.execute(stmt)
         await self.session.commit()
+        logger.info("Updated tailored_content", extra={"resume_id": str(resume_id)})
 
     async def update_tailored_yaml(self, resume_id: UUID, yaml_content: str):
         stmt = (
@@ -58,6 +64,7 @@ class ResumeService:
         )
         await self.session.execute(stmt)
         await self.session.commit()
+        logger.info("Updated tailored_yaml", extra={"resume_id": str(resume_id)})
 
     async def update_pdf_path(self, resume_id: UUID, file_path: str):
         stmt = (

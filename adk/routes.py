@@ -1,18 +1,13 @@
-import base64
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.runners import Runner
-from google.adk.sessions.database_session_service import StorageSession
 from google.genai import types
-from sqlalchemy import select
 
 from adk.agent import root_agent
 from adk.memory import get_session_service
 from adk.schemas import ChatResponse
-from adk.services.resume_service import ResumeService
-from db import sessionmanager
 from dependencies.auth_dependencies.auth import get_current_user
 from models import User
 from utils.logger import get_logger
@@ -31,93 +26,75 @@ async def chat_endpoint(
 ) -> ChatResponse:
     """
     Entry point for the ADK agent.
-    Injects file uploads via 'state_delta' in the user event.
+    - Saves uploaded file to disk.
+    - Injects 'resume_file_path' and 'user_id' via 'state_delta'.
+    - Relies on Agent to handle session initialization.
     """
     try:
         session_service = get_session_service()
         user_id = str(current_user.id)
         session_id = f"session_{user_id}"
 
-        # 1. Process File Upload (In-Memory -> Base64)
-        resume_b64: Optional[str] = None
-        file_name: str = ""
-
-        if file:
-            content = await file.read()
-            resume_b64 = base64.b64encode(content).decode("utf-8")
-            file_name = file.filename or "uploaded_resume.pdf"
-            logger.info(
-                "Processed file upload",
-                extra={"user_id": user_id, "size": len(content)},
-            )
-
-        # 2. Ensure Session Exists (Create if missing)
-        # Check if session exists
+        # Ensure session exists in ADK storage
         session = await session_service.get_session(
             app_name=APP_NAME, user_id=user_id, session_id=session_id
         )
-
         if not session:
-            session = await session_service.create_session(
-                app_name=APP_NAME,
-                user_id=user_id,
-                session_id=session_id,
+            await session_service.create_session(
+                app_name=APP_NAME, user_id=user_id, session_id=session_id
+            )
+            logger.info("Created new ADK session", extra={"session_id": session_id})
+
+        # 1. Process File Upload (Save to Disk)
+        resume_path: Optional[str] = None
+        file_name: str = ""
+
+        if file:
+            import os
+            import uuid
+
+            # Create uploads directory if not exists
+            upload_dir = "generated_resumes/uploads"
+            os.makedirs(upload_dir, exist_ok=True)
+
+            # Generate safe filename
+            file_ext = os.path.splitext(file.filename or "")[1]
+            if not file_ext:
+                file_ext = ".pdf"
+
+            safe_filename = f"{uuid.uuid4()}{file_ext}"
+            resume_path = os.path.abspath(os.path.join(upload_dir, safe_filename))
+
+            # Save file
+            content = await file.read()
+            with open(resume_path, "wb") as f:
+                f.write(content)
+
+            file_name = file.filename or "uploaded_resume.pdf"
+            logger.info(
+                "Processed file upload",
+                extra={"user_id": user_id, "path": resume_path, "size": len(content)},
             )
 
-   
-        current_state = session.state if session.state else {}
-        if not current_state.get("resume_id"):
-            logger.info("Session missing resume_id. Auto-initializing.")
-            if not sessionmanager.session_factory:
-                raise RuntimeError("Database not initialized")
-            async with sessionmanager.session_factory() as db_session:
-                # 1. Create Resume Record
-                resume_service = ResumeService(db_session)
-                # current_user.id is UUID
-                resume = await resume_service.create_resume(user_id=current_user.id)
-                resume_id = str(resume.id)
+            message += f"\n\n[System: User uploaded file '{file_name}'. Saved to disk.]"
 
-                # 2. Persist to Session Table
-                stmt = select(StorageSession).where(StorageSession.id == session.id)
-                result = await db_session.execute(stmt)
-                storage_session = result.scalars().first()
+        # 2. Prepare State Delta (Updates session state before run)
+        from typing import Any, Dict
 
-                if storage_session:
-                    new_state = (
-                        storage_session.state.copy() if storage_session.state else {}
-                    )
-                    new_state["resume_id"] = resume_id
-                    new_state["resume_uploaded"] = False
-                    new_state["job_description_provided"] = False
+        state_delta: Dict[str, Any] = {"user_id": user_id}
 
-                    storage_session.state = new_state  # type: ignore
-                    await db_session.commit()
-                    logger.info(
-                        "Auto-persisted resume_id to session",
-                        extra={"resume_id": resume_id, "session_id": str(session.id)},
-                    )
-
-            if session.state is None:
-                session.state = {}
-            session.state["resume_id"] = resume_id
-            session.state["resume_uploaded"] = False
-            session.state["job_description_provided"] = False
-
-        state_delta = {"user_id": user_id}
+        if resume_path:
+            state_delta["resume_file_path"] = resume_path
+            state_delta["resume_uploaded"] = True
 
         logger.info(
-            "Injecting user_id into session state.",
-            extra={"current_state": session.state},
+            "Injecting data into session state.",
+            extra={"state_delta": state_delta},
         )
-        if resume_b64:
-            state_delta.update(
-                {"resume_bytes_b64": resume_b64, "resume_filename": file_name}
-            )
-            message += f"\n\n[System: User uploaded file '{file_name}'. Check state for 'resume_bytes_b64'.]"
 
         user_content = types.Content(role="user", parts=[types.Part(text=message)])
 
-        # 4. Prepare Runner
+        # 3. Prepare Runner
         runner = Runner(
             agent=root_agent,
             app_name=APP_NAME,
@@ -125,7 +102,7 @@ async def chat_endpoint(
             artifact_service=InMemoryArtifactService(),
         )
 
-        # 5. Run Agent
+        # 4. Run Agent
         final_text = ""
         user_message_log = message[:100] + "..." if len(message) > 100 else message
         logger.info(
@@ -139,7 +116,6 @@ async def chat_endpoint(
             new_message=user_content,
             state_delta=state_delta,
         ):
-           
             logger.info(
                 "Runner Event",
                 extra={
@@ -165,17 +141,21 @@ async def chat_endpoint(
                     if part.text:
                         final_text += part.text
 
+        # 6. Fetch Final State for Response
+        session = await session_service.get_session(
+            app_name=APP_NAME, user_id=user_id, session_id=session_id
+        )
+
         agent_response_log = (
             final_text[:200] + "..." if len(final_text) > 200 else final_text
         )
         logger.info(
             "Agent Response",
-            extra={"user_id": user_id, "response_preview": agent_response_log},
-        )
-
-        # 6. Fetch Final State for Response
-        session = await session_service.get_session(
-            app_name=APP_NAME, user_id=user_id, session_id=session_id
+            extra={
+                "user_id": user_id,
+                "response_preview": agent_response_log,
+                "final_state": session.state if session else "None",
+            },
         )
 
         return ChatResponse(

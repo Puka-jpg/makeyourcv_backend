@@ -22,21 +22,13 @@ from utils.logger import get_logger
 
 logger = get_logger()
 
-_mcp_toolset: Optional[McpToolset] = None
-
 
 def get_mcp_toolset() -> Optional[McpToolset]:
     """
     Returns the appropriate MCP toolset based on settings.MCP_MODE.
 
-    Returns a cached instance to ensure all agents share the same MCP connection.
-    Returns None if MCP is disabled or if there's an error.
+    Creates a NEW instance each time to support per-request isolation and error recovery.
     """
-    global _mcp_toolset
-
-    if _mcp_toolset is not None:
-        return _mcp_toolset
-
     mcp_mode = settings.MCP_MODE.lower()
 
     if mcp_mode == "disabled":
@@ -47,7 +39,7 @@ def get_mcp_toolset() -> Optional[McpToolset]:
         if mcp_mode == "local":
             logger.info("Configuring MCP in LOCAL (stdio) mode")
             args = settings.RENDER_CV_MCP_ARGS.split(",")
-            _mcp_toolset = McpToolset(
+            return McpToolset(
                 connection_params=StdioConnectionParams(
                     server_params=StdioServerParameters(
                         command=settings.RENDER_CV_MCP_COMMAND,
@@ -61,7 +53,7 @@ def get_mcp_toolset() -> Optional[McpToolset]:
                 "Configuring MCP in REMOTE (SSE) mode",
                 extra={"url": settings.RENDER_CV_MCP_URL},
             )
-            _mcp_toolset = McpToolset(
+            return McpToolset(
                 connection_params=SseConnectionParams(url=settings.RENDER_CV_MCP_URL)
             )
         else:
@@ -74,8 +66,6 @@ def get_mcp_toolset() -> Optional[McpToolset]:
             extra={"error": str(e), "mode": mcp_mode},
         )
         return None
-
-    return _mcp_toolset
 
 
 def build_tools_with_mcp(local_tools: list) -> list:

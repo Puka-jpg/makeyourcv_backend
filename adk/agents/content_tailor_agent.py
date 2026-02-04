@@ -79,5 +79,4 @@ def get_content_tailor_agent() -> Agent:
           }
         }
         """,
-        
     )

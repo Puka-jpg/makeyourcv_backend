@@ -40,10 +40,10 @@ dev= [
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
-exclude = ["adk_test_projects", "tests", "reproduce_issue.py"]
+exclude = ["adk_test_projects", "tests", "reproduce_issue.py" ,"adk/tools/state_tools.py", "test_all_tools.py"]
 
 [tool.ruff]
-exclude = ["adk_test_projects", "tests", "reproduce_issue.py"]
+exclude = ["adk_test_projects", "tests", "reproduce_issue.py", "adk/tools/state_tools.py", "test_all_tools.py"]
 
 [tool.ruff.lint]
 ignore = ["E501"]

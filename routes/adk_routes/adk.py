@@ -1,7 +1,8 @@
-from typing import Optional
+import os
+import uuid
+from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from google.adk.artifacts import InMemoryArtifactService
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from google.adk.runners import Runner
 from google.genai import types
 
@@ -10,10 +11,21 @@ from adk.memory import get_session_service
 from adk.schemas import ChatResponse
 from dependencies.auth_dependencies.auth import get_current_user
 from models import User
+from schemas.common import ErrorResponseSchema
 from utils.logger import get_logger
+from db import get_db
 
 logger = get_logger()
-router = APIRouter(prefix="/adk", tags=["ADK Agent"])
+
+
+router = APIRouter(
+    responses={
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorResponseSchema,
+            "description": "Forbidden Response",
+        }
+    },
+)
 
 APP_NAME = "agents"
 
@@ -31,8 +43,8 @@ async def chat_endpoint(
     - Relies on Agent to handle session initialization.
     """
     try:
-        session_service = get_session_service()
-        user_id = str(current_user.id)
+        session_service = get_db()
+        user_id = current_user.id
         session_id = f"session_{user_id}"
 
         # Ensure session exists in ADK storage
@@ -43,18 +55,17 @@ async def chat_endpoint(
             await session_service.create_session(
                 app_name=APP_NAME, user_id=user_id, session_id=session_id
             )
-            logger.info("Created new ADK session", extra={"session_id": session_id})
+            logger.info(
+                "Created new ADK user session", extra={"session_id": session_id}
+            )
 
         # 1. Process File Upload (Save to Disk)
         resume_path: Optional[str] = None
         file_name: str = ""
 
         if file:
-            import os
-            import uuid
-
             # Create uploads directory if not exists
-            upload_dir = "generated_resumes/uploads"
+            upload_dir = "/home/pukar-kafle/Documents/Resume-Builder/resumes/uploads"
             os.makedirs(upload_dir, exist_ok=True)
 
             # Generate safe filename
@@ -62,24 +73,25 @@ async def chat_endpoint(
             if not file_ext:
                 file_ext = ".pdf"
 
-            safe_filename = f"{uuid.uuid4()}{file_ext}"
-            resume_path = os.path.abspath(os.path.join(upload_dir, safe_filename))
+            filename = f"{uuid.uuid4()}{file_ext}"
+            resume_path = os.path.abspath(os.path.join(upload_dir, filename))
 
             # Save file
             content = await file.read()
             with open(resume_path, "wb") as f:
                 f.write(content)
-
-            file_name = file.filename or "uploaded_resume.pdf"
+            if file.filename:
+                file_name = file.filename
             logger.info(
                 "Processed file upload",
                 extra={"user_id": user_id, "path": resume_path, "size": len(content)},
             )
 
-            message += f"\n\n[System: User uploaded file '{file_name}'. Saved to disk.]"
+            message += (
+                f"\n\n[System: User uploaded file '{file_name}'. Saved to local disk.]"
+            )
 
         # 2. Prepare State Delta (Updates session state before run)
-        from typing import Any, Dict
 
         state_delta: Dict[str, Any] = {"user_id": user_id}
 
@@ -99,7 +111,6 @@ async def chat_endpoint(
             agent=root_agent,
             app_name=APP_NAME,
             session_service=session_service,
-            artifact_service=InMemoryArtifactService(),
         )
 
         # 4. Run Agent

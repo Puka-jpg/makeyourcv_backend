@@ -11,8 +11,8 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from adk.routes import router as adk_routes
 from db import sessionmanager
+from routes.adk_routes.adk import router as adk_routes
 from routes.auth_routes.auth import router as auth_routes
 from schemas.common import ErrorResponseSchema
 from settings import settings
@@ -93,7 +93,7 @@ async def logging_middleware(
 
 app.include_router(auth_routes, prefix="/api/auth", tags=["Auth"])
 
-app.include_router(adk_routes, prefix="/api/v1")
+app.include_router(adk_routes, prefix="/api/adk", tags=["ADK"])
 
 os.makedirs("generated_resumes", exist_ok=True)
 app.mount(

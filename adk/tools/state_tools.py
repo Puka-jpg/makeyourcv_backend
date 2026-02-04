@@ -17,6 +17,7 @@ from adk.services.resume_service import ResumeService
 from db import sessionmanager
 from utils.logger import get_logger
 
+
 # Helper for Lazy Init
 def ensure_db_initialized():
     if not sessionmanager.session_factory:
@@ -84,6 +85,7 @@ async def init_resume_session(
                  
             async with sessionmanager.session_factory() as session:
                 from sqlalchemy import select
+
                 from models import User
                 
                 # Check for existing user
@@ -94,7 +96,7 @@ async def init_resume_session(
                 if user:
                     user_id = user.id
                     user_id_val = str(user_id)
-                    logger.info(f"Using existing user as fallback: {user_id}")
+                    logger.info("Using existing user as fallback: %s", user_id)
                 else:
                     # Create default dev user
                     new_user_id = uuid.uuid4()
@@ -109,7 +111,7 @@ async def init_resume_session(
                     await session.commit()
                     user_id = new_user_id
                     user_id_val = str(new_user_id)
-                    logger.info(f"Created new dev user: {user_id}")
+                    logger.info("Created new dev user: %s", user_id)
             
             # Update state with the discovered/created user_id
             tool_context.state["user_id"] = user_id_val
